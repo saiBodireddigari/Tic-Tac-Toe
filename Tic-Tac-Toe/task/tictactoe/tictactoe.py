@@ -1,85 +1,80 @@
-game_input = input("Enter cells: ")
-game_list = list(game_input)
-matrix = []
+game_input = list("         ")
 
 
-def matrix_init(x_or_o):
+def matrix_init(x_o_list_input):
+    matrix = []
     for row in range(3):
-        row_list = [x_or_o[3 * row + column] for column in range(3)
-                    if "X" in x_or_o or "O" in x_or_o or "-" in x_or_o]
+        row_list = [x_o_list_input[3 * row + column] for column in range(3)]
         matrix.append(row_list)
+    return matrix
 
 
-def matrix_printing(x_o_matrix):
+def matrix_printing(game_list_matrix):
     print("---------")
     for i in range(3):
         print("|", end=" ")
         for j in range(3):
-            print(x_o_matrix[i][j], end=" ")
+            print(game_list_matrix[i][j], end=" ")
         print("|")
     print("---------")
 
 
-matrix_init(game_list)
-matrix_printing(matrix)
+def winner_check(current_state_list, count):
+    col1 = current_state_list[0:3]
+    col2 = current_state_list[3:6]
+    col3 = current_state_list[6:9]
+    row1 = current_state_list[0:7:3]
+    row2 = current_state_list[1:8:3]
+    row3 = current_state_list[2:9:3]
+    cross1 = current_state_list[0:9:4]
+    cross2 = current_state_list[2:7:2]
 
+    result_matrix = [col1, col2, col3, row1, row2, row3, cross1, cross2]
 
-def matrix_check(x_o_matrix, position_list):
-    row_matrix = []
-    for position in position_list:
-        x = position[0]
-        y = position[1]
-        row_matrix.append(x_o_matrix[x][y])
-    return row_matrix
-
-
-def game():
-    count_x = 0
-    count_o = 0
-
-    win_series_x = ["X", "X", "X"]
-    win_series_0 = ["O", "O", "O"]
-
-    col_0 = matrix_check(matrix, [[0, 0], [0, 1], [0, 2]])
-    col_1 = matrix_check(matrix, [[1, 0], [1, 1], [1, 2]])
-    col_2 = matrix_check(matrix, [[2, 0], [2, 1], [2, 2]])
-    cross_1 = matrix_check(matrix, [[0, 0], [1, 1], [2, 2]])
-    cross_2 = matrix_check(matrix, [[0, 2], [1, 1], [2, 0]])
-    row_0 = matrix_check(matrix, [[0, 0], [1, 0], [2, 0]])
-    row_1 = matrix_check(matrix, [[0, 1], [1, 1], [2, 1]])
-    row_2 = matrix_check(matrix, [[0, 2], [1, 2], [2, 2]])
-
-    winner_is_x = (col_0 == win_series_x) or (col_1 == win_series_x) or \
-                  (col_2 == win_series_x) or (cross_1 == win_series_x) or \
-                  (cross_2 == win_series_x) or (row_0 == win_series_x) or \
-                  (row_1 == win_series_x) or (row_2 == win_series_x)
-    winner_is_o = (col_0 == win_series_0) or (col_1 == win_series_0) or \
-                  (col_2 == win_series_0) or (cross_1 == win_series_0) or \
-                  (cross_2 == win_series_0) or (row_0 == win_series_0) or \
-                  (row_1 == win_series_0) or (row_2 == win_series_0)
-
-    for X_O in game_list:
-        if X_O == "X":
-            count_x += 1
-        elif X_O == "O":
-            count_o += 1
-
-    while winner_is_x:
-        if not winner_is_o:
-            print("X wins")
-            break
-        elif winner_is_o:
-            print("Impossible")
-            break
+    if ["X", "X", "X"] in result_matrix:
+        print("X wins")
+        determine_result = True
+    elif ["O", "O", "O"] in result_matrix:
+        print("O wins")
+        determine_result = True
+    elif len(current_state_list) == 9 and not (["X", "X", "X"] in result_matrix) \
+            and not (["O", "O", "O"] in result_matrix) and count > 9:
+        print("Draw")
+        determine_result = True
     else:
-        if winner_is_o:
-            print("O wins")
-        elif ("_" not in game_list) and not winner_is_o and not winner_is_x:
-            print("Draw")
-        elif abs(count_x - count_o) >= 2:
-            print("Impossible")
+        determine_result = False
+
+    return determine_result
+
+
+def play_the_game():
+    counter = 1
+    while True:
+        coordinates = list(input("Enter the coordinates: "))
+        x_coordinate = coordinates[0]
+        y_coordinate = coordinates[len(coordinates) - 1]
+        if str.isnumeric(x_coordinate) and str.isnumeric(y_coordinate):
+            if int(x_coordinate) in [1, 2, 3] and int(y_coordinate) in [1, 2, 3]:
+                cells = [13, 23, 33, 12, 22, 32, 11, 21, 31]
+                join_coordinates = int(x_coordinate + y_coordinate)
+                if game_input[cells.index(join_coordinates)] not in ["X", "O"]:
+                    if counter % 2 == 0:
+                        game_input[cells.index(join_coordinates)] = "O"
+                    else:
+                        game_input[cells.index(join_coordinates)] = "X"
+                    counter += 1
+                    matrix_printing(matrix_init(game_input))
+
+                    win = winner_check(game_input, counter)
+                    if win:
+                        break
+                else:
+                    print("This cell is occupied! Choose another one!")
+            else:
+                print("Coordinates should be from 1 to 3!")
         else:
-            print("Game not finished")
+            print("You should enter numbers!")
 
 
-game()
+matrix_printing(matrix_init(game_input))
+play_the_game()
